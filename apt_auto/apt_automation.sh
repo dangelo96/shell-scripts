@@ -42,17 +42,24 @@ OPTION=1;
 
 # Menu info
 MENU="""
+    
     #--------------------MENU----------------------#
         
     1 - Refresh the available package list
     2 - Upgrade all available programs
-    3 - Install the package
-            
+    3 - Install a package
+    4 - Reinstall a package 
+
+    9 - Clear console        
     0 - Exit
 
     #------------------END MENU--------------------#
+
 """
 
+PACKAGE=""
+PACKAGE_FOUND=""
+INSTALL=""
 
 
 # ---------------------------------------------   MAIN LOOP   ----------------------------------------------- #
@@ -76,26 +83,106 @@ do
 
         # Refresh the available package list
         1)
+
+            echo -e "\n\n\n============  REFRESH PACKAGE LIST  ============"
+
             # Refreshing
-            echo -e "\nUpgrading all..."
+            echo -e "\nUpdating all..."
             sleep 2
             sudo apt -qq update
-            echo -e "\n\nUpdated."
+            echo -e "\nUpdated."
             
             # Showing the list of upgradable packages
             echo -e "\nListing the upgradable packages..."
             sleep 2
             sudo apt list -qq --upgradable
+
+            echo -e "\n==========  END REFRESH PACKAGE LIST  ==========\n\n\n"
         ;;
+
 
         # Upgrade
         2)
+            echo -e "\n\n\n==============  UPGRADE PACKAGES  ==============\n"
+
             # Upgrading quietly with the '-qq' flag
-            echo -e "\nUpgrading..."
+            echo -e "Upgrading..."
             sleep 2
             sudo apt -qq upgrade -y
-            echo -e "\nUpgraded.\n\n"
+            echo -e "Upgraded.\n"
+
+            echo -e "============  END UPGRADE PACKAGES  ============\n\n\n"
         ;;
+
+        # Installing a package
+        3)
+
+            echo -e "\n\n\n==============  INSTALL PACKAGES  ==============\n"
+            
+            # Collecting the name of the package
+            printf "\nType the name of the package that you're looking for: "
+            read PACKAGE
+            
+            # Searching for the specific package
+            echo -e "\nSearching..."
+            sleep 1
+            PACKAGE_FOUND="$( sudo apt -qq search ^${PACKAGE}$ )"
+
+
+            # Verifying if the given package is already installed
+            ALREADY_INSTALLED="$( sudo apt list --installed | grep ${PACKAGE} )"
+
+
+            # Verifying the search result
+            if ([ "$PACKAGE_FOUND" != "" ]) && ([ "$ALREADY_INSTALLED" == "" ])
+            then
+
+                # The package was found and the script will show some info about
+                echo -e "Package ${PACKAGE} found! Listing info about ${PACKAGE}:"
+                sleep 2
+                sudo apt -qq show $PACKAGE_FOUND
+
+
+                # Confirming the installation
+                printf "\nDo you want to install ${PACKAGE}? [y/n] "
+                read INSTALL
+
+                case "$INSTALL" in
+                    "y"|"Y")
+                        sudo apt -qq install $PACKAGE_FOUND
+                    ;;
+
+                    *)
+                        echo -e "\nInstallation cancelled."
+                    ;;
+                esac
+
+            # The package was found, but is already installed
+            elif [ "$ALREADY_INSTALLED" != "" ]
+            then
+                echo -e "\nWARNING: '${PACKAGE}' is already installed.\nPlease verify if you want to reinstall (option 4) the package."
+
+            # The package was not found.
+            else
+                echo -e "\nPackage not found!"
+            fi
+
+            echo -e "\n============  END INSTALL PACKAGES  ============\n\n\n"
+        ;;
+
+
+        9)
+            clear
+        ;;
+
+        0)
+            exit 0
+        ;;
+
+        *)
+            echo -e "\nInvalid option!"
+        ;;
+        
 
     esac
 
