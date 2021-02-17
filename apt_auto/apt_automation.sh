@@ -132,7 +132,7 @@ do
 
 
             # Verifying if the given package is already installed
-            ALREADY_INSTALLED="$( sudo apt list --installed | grep ${PACKAGE} )"
+            ALREADY_INSTALLED="$( sudo apt list --installed | grep ^${PACKAGE}$ )"
 
 
             # Verifying the search result
@@ -150,7 +150,8 @@ do
                 read INSTALL
                 case "$INSTALL" in
                     "y"|"Y")
-                        sudo apt -qq install $PACKAGE_FOUND
+                        sudo apt -qq install $PACKAGE -y
+                        echo -e "\nPackage successfully installed!"
                     ;;
 
                     *)
