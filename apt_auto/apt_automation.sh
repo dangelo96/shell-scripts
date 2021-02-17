@@ -5,40 +5,43 @@
 #       Author:             Daniel D'Angelo
 #       GitHub:             https://github.com/dangelo96
 #       Date:               Feb 14, 2021
-#
-#
-#
+
+
 ############################################    DESCRIPTION    ###############################################
 #                                                                                                            #
-#   This script will make the 'apt' operations easier to do. You'll able to:                                 #
-#       * Update the available package list                                                                  #
-#       * Install, upgrade and remove packages                                                               #
-#       * Upgrade the system                                                                                 #
-#       * Search for packages (already installed or not)                                                     #
+#       This script will make the 'apt' operations easier to do. You'll able to:                             #
+#           * Update the available package list                                                              #
+#           * Install, upgrade and remove packages                                                           #
+#           * Reinstall packages                                                                             #
 #                                                                                                            #
-#   By the way, the script works in choices through a simple menu. Example:                                  #
+#       By the way, the script works in choices through a simple loop menu.                                  #
 #                                                                                                            #
 ##############################################################################################################
-#
-#
+
+
 ##############################################    HISTORY    #################################################
 #                                                                                                            #
 #       v1.0    2021-02-14, Daniel D'Angelo:                                                                 #
 #           - added the menu structure                                                                       #
+#           - added the options:                                                                             #
+#               - update                                                                                     #
+#               - upgrade                                                                                    #
+#               - install, remove and reinstall packages                                                     #
 #                                                                                                            #
 #                                                                                                            #
 ##############################################################################################################
-
 
 
 # ----------------------------------------------   SCRIPT   ------------------------------------------------ #
 # ----------------------------------------   VARIABLE DECLARATION   ---------------------------------------- #
 
-# Script version
-VERSION="1.0"
+VERSION="1.0"               # Script version
+OPTION=1;                   # Loop Flag. The loop ends with "exit" input.
 
-# Loop Flag. The loop ends with "exit" input.
-OPTION=1;
+PACKAGE=""                  # Input from user; package that will be installed, reinstalled or removed
+PACKAGE_FOUND=""            # Variable to save the package search in apt operations
+INSTALL=""                  # Variable that decides if the user want to install or not a package
+ALREADY_INSTALLED=""        # Saves the status from package (if the package given is already installed or not)
 
 # Menu info
 MENU="""
@@ -51,6 +54,7 @@ MENU="""
     4 - Reinstall a package
     5 - Remove package
 
+    8 - Show version
     9 - Clear console        
     0 - Exit
 
@@ -58,17 +62,14 @@ MENU="""
 
 """
 
-PACKAGE=""
-PACKAGE_FOUND=""
-INSTALL=""
-
-
-# ---------------------------------------------   MAIN LOOP   ----------------------------------------------- #
+# -----------------------------------------------   MAIN   ------------------------------------------------- #
 
 # Welcome message
 clear
 echo -e "Welcome to the 'apt' automation!"
 
+
+# Loop Menu
 while [ $OPTION -gt 0 ]
 do
 
@@ -84,18 +85,17 @@ do
 
         # Refresh the available package list
         1)
-
             echo -e "\n\n\n============  REFRESH PACKAGE LIST  ============"
 
-            # Refreshing
+            # Refreshing quietly (-qq flag)
             echo -e "\nUpdating all..."
-            sleep 2
+            sleep 1
             sudo apt -qq update
             echo -e "\nUpdated."
             
             # Showing the list of upgradable packages
             echo -e "\nListing the upgradable packages..."
-            sleep 2
+            sleep 1
             sudo apt list -qq --upgradable
 
             echo -e "\n==========  END REFRESH PACKAGE LIST  ==========\n\n\n"
@@ -109,7 +109,7 @@ do
 
             # Upgrading quietly with the '-qq' flag
             echo -e "Upgrading..."
-            sleep 2
+            sleep 1
             sudo apt -qq upgrade -y
             echo -e "Upgraded.\n"
 
@@ -119,7 +119,6 @@ do
 
         # Installing a package
         3)
-
             echo -e "\n\n\n==============  INSTALL PACKAGES  ==============\n"
             
             # Collecting the name of the package
@@ -149,7 +148,6 @@ do
                 # Confirming the installation
                 printf "\nDo you want to install ${PACKAGE}? [y/n] "
                 read INSTALL
-
                 case "$INSTALL" in
                     "y"|"Y")
                         sudo apt -qq install $PACKAGE_FOUND
@@ -188,9 +186,11 @@ do
                 echo -e "\nWARNING: '${PACKAGE}' is not installed."
             fi
 
+            # Reinstalling (or installing for the 1st time) the package
             sudo apt -qq reinstall "${PACKAGE}" 
 
             echo -e "\n===========  END REINSTALL PACKAGES  ===========\n\n\n"
+            sleep 1
         ;;
 
         # Removing packages
@@ -211,7 +211,6 @@ do
                 echo -e "Please check the package and try again".
 
             else
-
                 echo -e "\nRemoving..."
                 sleep 1
 
@@ -223,22 +222,25 @@ do
             echo -e "\n\n\n===========  END REMOVING PACKAGES  ===========\n"  
         ;;
 
+        # Show the version
+        8)
+            echo -e "\napt_automation.sh - v${VERSION}"    
+        ;;
+
+        # Cleaning the console
         9)
             clear
         ;;
 
+        # Exiting the program
         0)
             exit 0
         ;;
 
+        # Any other input is invalid
         *)
             echo -e "\nInvalid option!"
         ;;
-        
 
     esac
-
-
-
-
 done
