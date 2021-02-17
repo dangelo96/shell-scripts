@@ -48,7 +48,8 @@ MENU="""
     1 - Refresh the available package list
     2 - Upgrade all available programs
     3 - Install a package
-    4 - Reinstall a package 
+    4 - Reinstall a package
+    5 - Remove package
 
     9 - Clear console        
     0 - Exit
@@ -66,7 +67,7 @@ INSTALL=""
 
 # Welcome message
 clear
-echo -e "Welcome to the 'apt' automation!\n"
+echo -e "Welcome to the 'apt' automation!"
 
 while [ $OPTION -gt 0 ]
 do
@@ -75,7 +76,7 @@ do
     echo -e "$MENU"
 
     # Collecting input
-    printf "\nType an option: "
+    printf "    Type an option: "
     read OPTION
     
 
@@ -98,6 +99,7 @@ do
             sudo apt list -qq --upgradable
 
             echo -e "\n==========  END REFRESH PACKAGE LIST  ==========\n\n\n"
+            sleep 1
         ;;
 
 
@@ -112,6 +114,7 @@ do
             echo -e "Upgraded.\n"
 
             echo -e "============  END UPGRADE PACKAGES  ============\n\n\n"
+            sleep 1
         ;;
 
         # Installing a package
@@ -120,7 +123,7 @@ do
             echo -e "\n\n\n==============  INSTALL PACKAGES  ==============\n"
             
             # Collecting the name of the package
-            printf "\nType the name of the package that you're looking for: "
+            printf "\nType the package that you're looking for: "
             read PACKAGE
             
             # Searching for the specific package
@@ -168,8 +171,57 @@ do
             fi
 
             echo -e "\n============  END INSTALL PACKAGES  ============\n\n\n"
+            sleep 1
         ;;
 
+        # Reinstall packages
+        4)
+            echo -e "\n\n\n=============  REINSTALL PACKAGES  =============\n"
+
+            # Collecting the package
+            printf "Type the package you want to reinstall: "
+            read PACKAGE
+
+            # Verifying if the package is already installed
+            if [ "$( apt list --installed | grep ${PACKAGE} )" == "" ]
+            then
+                echo -e "\nWARNING: '${PACKAGE}' is not installed."
+            fi
+
+            sudo apt -qq reinstall "${PACKAGE}" 
+
+            echo -e "\n===========  END REINSTALL PACKAGES  ===========\n\n\n"
+        ;;
+
+        # Removing packages
+        5)
+            echo -e "\n\n\n=============  REMOVING PACKAGES  =============\n"  
+
+            # Collecting the package
+            printf "Type the package you want to remove: "
+            read PACKAGE
+            sleep 1
+
+            # Verifying if the package is installed
+            if [ "$( apt list --installed | grep ${PACKAGE} )" == "" ]
+            then
+
+                # Printing out that the package given was not found
+                echo -e "\nThe package you're looking for is not installed."
+                echo -e "Please check the package and try again".
+
+            else
+
+                echo -e "\nRemoving..."
+                sleep 1
+
+                # Removing the package and cleaning the unnecessary packages
+                sudo apt remove "$PACKAGE"
+                sudo apt autoremove
+            fi
+            
+            echo -e "\n\n\n===========  END REMOVING PACKAGES  ===========\n"  
+        ;;
 
         9)
             clear
