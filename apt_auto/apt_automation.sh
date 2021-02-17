@@ -88,6 +88,15 @@ do
             sudo apt list -qq --upgradable
         ;;
 
+        # Upgrade
+        2)
+            # Upgrading quietly with the '-qq' flag
+            echo -e "\nUpgrading..."
+            sleep 2
+            sudo apt -qq upgrade -y
+            echo -e "\nUpgraded.\n\n"
+        ;;
+
     esac
 
 
